@@ -23,6 +23,7 @@ public class EmpleadoControlador {
         cargarDatosDePrueba();
     }
 
+    // Carga algunos empleados para probar el programa
     private void cargarDatosDePrueba() {
 
         String[] cedulas = {"1001", "1002", "1003", "1004"};
@@ -67,28 +68,27 @@ public class EmpleadoControlador {
         }
     }
 
+    // Valida números permitiendo puntos para separar miles
     private boolean esNumeroValido(String texto) {
 
-        if (texto.isEmpty() || texto.equals(".")) {
+        if (texto.isEmpty()) {
             return false;
         }
 
-        int puntos = 0;
+        // Quitamos los puntos antes de revisar el número
+        texto = texto.replace(".", "");
 
         for (int i = 0; i < texto.length(); i++) {
 
-            char c = texto.charAt(i);
-
-            if (c == '.') {
-                puntos++;
-            } else if (!Character.isDigit(c)) {
+            if (!Character.isDigit(texto.charAt(i))) {
                 return false;
             }
         }
 
-        return puntos <= 1;
+        return true;
     }
 
+    // Valida los datos que vienen del formulario
     private String validar(String cedula,
                            String nombre,
                            String salario,
@@ -100,29 +100,35 @@ public class EmpleadoControlador {
         }
 
         if (!esNumeroValido(salario)) {
-            return "El salario debe ser un número positivo (sin puntos de miles).";
+            return "El salario debe ser un número válido.";
         }
 
         if (tipo.equals("Administrativo")
                 && !esNumeroValido(bonificacion)) {
 
-            return "La bonificación debe ser un número positivo.";
+            return "La bonificación debe ser un número válido.";
         }
 
         return null;
     }
 
+    // Crea el tipo de empleado correspondiente
     private EmpleadoBase construirEmpleado(String cedula,
                                            String nombre,
                                            String salario,
                                            String tipo,
                                            String bonificacion) {
 
-        double salarioBase = Double.parseDouble(salario);
+        // Quitamos los puntos antes de convertir a double
+        double salarioBase = Double.parseDouble(
+                salario.replace(".", "")
+        );
 
         if (tipo.equals("Administrativo")) {
 
-            double bono = Double.parseDouble(bonificacion);
+            double bono = Double.parseDouble(
+                    bonificacion.replace(".", "")
+            );
 
             return new EmpleadoAdministrativo(
                     cedula,
@@ -138,6 +144,8 @@ public class EmpleadoControlador {
                 salarioBase
         );
     }
+
+    // ======================= CRUD =======================
 
     public String agregarEmpleado(String cedula,
                                   String nombre,
@@ -219,7 +227,8 @@ public class EmpleadoControlador {
             return "Empleado actualizado correctamente.";
         }
 
-        return "No existe ningún empleado con la cédula " + cedula + ".";
+        return "No existe ningún empleado con la cédula "
+                + cedula + ".";
     }
 
     public String eliminarEmpleado(String cedula) {
@@ -231,18 +240,22 @@ public class EmpleadoControlador {
             return "Empleado eliminado correctamente.";
         }
 
-        return "No existe ningún empleado con la cédula " + cedula + ".";
+        return "No existe ningún empleado con la cédula "
+                + cedula + ".";
     }
 
     public ArrayList<EmpleadoBase> obtenerEmpleados() {
         return repositorio.listarTodos();
     }
 
+    // Calcula el total de todos los salarios
     public double calcularTotalNomina() {
 
         double total = 0;
 
-        for (EmpleadoBase empleado : repositorio.listarTodos()) {
+        for (EmpleadoBase empleado :
+                repositorio.listarTodos()) {
+
             total += empleado.calcularSalarioTotal();
         }
 
